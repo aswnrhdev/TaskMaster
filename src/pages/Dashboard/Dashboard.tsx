@@ -303,33 +303,38 @@ const Dashboard: React.FC = () => {
                         <div className="bg-[#373A40] bg-opacity-80 p-6 shadow-lg">
                             {activeTab === 'taskDetails' && (
                                 <div>
-                                    <h2 className="text-xl">Active Tasks</h2>
+                                    <h2 className="text-xl mb-4">Active Tasks</h2>
                                     {tasks.length > 0 ? (
-                                        <div className="space-y-4 mt-5">
+                                        <div className="space-y-4">
                                             {tasks.map((taskItem) => (
-                                                <div key={taskItem._id} className="bg-[#373A40] p-4 flex justify-between items-center">
-                                                    <div>
-                                                        <h3 className="">{taskItem.taskName}</h3>
-                                                    </div>
-                                                    <div className="flex space-x-2">
-                                                        <button
-                                                            className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded transition-colors flex items-center"
-                                                            onClick={() => handleEditTask(taskItem)}
-                                                        >
-                                                            <MdOutlineEditCalendar /> <span className="ml-1">Edit Task</span>
-                                                        </button>
-                                                        <button
-                                                            className="bg-red-500 hover:bg-red-60 text-white px-2 py-1 rounded transition-colors flex items-center"
-                                                            onClick={() => handleDeleteTask(taskItem._id)}
-                                                        >
-                                                            <FaTrash /> <span className="ml-1">Delete Task</span>
-                                                        </button>
-                                                        <button
-                                                            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded transition-colors flex items-center"
-                                                            onClick={() => handleCompleteTask(taskItem._id)}
-                                                        >
-                                                            <IoCheckmarkDoneSharp /> <span className="ml-1">Complete Task</span>
-                                                        </button>
+                                                <div key={taskItem._id} className="bg-[#423F3E] p-4 shadow">
+                                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                                                        <h3 className="text-lg mb-2 md:mb-0 break-words w-full md:w-1/3 lg:w-1/2">
+                                                            {taskItem.taskName}
+                                                        </h3>
+                                                        <div className="flex flex-wrap gap-2 md:w-2/3 lg:w-1/2 justify-start md:justify-end">
+                                                            <button
+                                                                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition-colors flex items-center justify-center text-sm whitespace-nowrap"
+                                                                onClick={() => handleEditTask(taskItem)}
+                                                            >
+                                                                <MdOutlineEditCalendar className="mr-1" />
+                                                                <span className="hidden sm:inline">Edit Task</span>
+                                                            </button>
+                                                            <button
+                                                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition-colors flex items-center justify-center text-sm whitespace-nowrap"
+                                                                onClick={() => handleDeleteTask(taskItem._id)}
+                                                            >
+                                                                <FaTrash className="mr-1" />
+                                                                <span className="hidden sm:inline">Delete Task</span>
+                                                            </button>
+                                                            <button
+                                                                className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded transition-colors flex items-center justify-center text-sm whitespace-nowrap"
+                                                                onClick={() => handleCompleteTask(taskItem._id)}
+                                                            >
+                                                                <IoCheckmarkDoneSharp className="mr-1" />
+                                                                <span className="hidden sm:inline">Complete Task</span>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ))}
@@ -341,13 +346,15 @@ const Dashboard: React.FC = () => {
                             )}
                             {activeTab === 'completedTasks' && (
                                 <div>
-                                    <h2 className="text-xl font-bold mb-4">Completed Missions</h2>
+                                    <h2 className="font-bold mb-1 text-2xl">Completed Missions</h2>
+                                    <p className='mb-3 text-sm'>Great job so far! Check out the completed task below and keep up the good work!</p>
                                     {completedTasks.length > 0 ? (
                                         <div className="space-y-4">
                                             {completedTasks.map((completedTask, index) => (
-                                                <div key={index} className="bg-gray-800 p-4">
-                                                    <h3 className="font-bold flex items-center">
-                                                        <FaCheckCircle className="text-green-500 mr-2" /> {completedTask.taskName}
+                                                <div key={index} className="bg-[#423F3E] p-4">
+                                                    <h3 className="flex items-center break-words">
+                                                        <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0" />
+                                                        <span>{completedTask.taskName}</span>
                                                     </h3>
                                                 </div>
                                             ))}
@@ -359,6 +366,9 @@ const Dashboard: React.FC = () => {
                             )}
                         </div>
                     </div>
+
+
+
                 </div>
             </div>
 
