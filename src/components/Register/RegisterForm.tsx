@@ -90,7 +90,6 @@ const RegisterForm = () => {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(schema),
   });
