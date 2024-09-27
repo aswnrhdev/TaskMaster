@@ -92,7 +92,7 @@ const Dashboard: React.FC = () => {
     const { userInfo } = useSelector((state: any) => state.userInfo);
 
     useEffect(() => {
-        const socket = io('http://localhost:5000');
+        const socket = io(`${import.meta.env.VITE_BASE_URL}`);
         socket.emit('user_login', userInfo._id);
 
         socket.on('task_added', (newTask: Task) => {
