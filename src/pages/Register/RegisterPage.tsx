@@ -3,7 +3,6 @@ import RegisterForm from "../../components/Register/RegisterForm"
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
-
 const RegisterPage = () => {
     const { userInfo } = useSelector((state: any) => state.userInfo);
     const navigate = useNavigate()
