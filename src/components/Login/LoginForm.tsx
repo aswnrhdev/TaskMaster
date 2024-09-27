@@ -92,11 +92,23 @@ const LoginForm = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
-  // Form submission handler
+  useEffect(() => {
+    // Pre-fill email and password fields if available in localStorage
+    const lastEmail = localStorage.getItem("lastRegisteredEmail");
+    const lastPassword = localStorage.getItem("lastRegisteredPassword");
+    if (lastEmail) setValue("email", lastEmail);
+    if (lastPassword) setValue("password", lastPassword);
+    
+    // Clear the stored credentials after pre-filling
+    localStorage.removeItem("lastRegisteredEmail");
+    localStorage.removeItem("lastRegisteredPassword");
+  }, [setValue]);
+
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
       const response = await login(data);

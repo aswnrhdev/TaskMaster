@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signup } from "../../api/api";
 import { MdOutlineInventory } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 const schema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters long" }),
@@ -83,6 +84,7 @@ type RegisterFormData = {
 
 const RegisterForm = () => {
   const [registerError, setRegisterError] = useState("");
+  const navigate = useNavigate();
 
   const {
     register,
@@ -97,7 +99,12 @@ const RegisterForm = () => {
     try {
       const response = await signup({ name: data.name, email: data.email, password: data.password });
       if (response.success) {
-        reset();
+        alert("User created successfully!");
+        // Store email and password in localStorage
+        localStorage.setItem("lastRegisteredEmail", data.email);
+        localStorage.setItem("lastRegisteredPassword", data.password);
+        // Navigate to login page
+        navigate("/");
       } else {
         setRegisterError(response.error ?? "Unknown error occurred");
       }
