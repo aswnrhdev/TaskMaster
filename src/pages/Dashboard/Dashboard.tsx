@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { removeUserInfo } from '../../redux/slice/userSlice';
@@ -15,7 +15,6 @@ interface Task {
     taskName: string;
     status: 'Pending' | 'In Progress' | 'Completed';
 }
-
 
 
 const Starfield: React.FC = () => {
@@ -91,13 +90,20 @@ const Dashboard: React.FC = () => {
 
     const { userInfo } = useSelector((state: any) => state.userInfo);
 
+    const addTask = useCallback((newTask: Task) => {
+        setTasks(prevTasks => {
+            if (!prevTasks.some(task => task._id === newTask._id)) {
+                return [...prevTasks, newTask];
+            }
+            return prevTasks;
+        });
+    }, []);
+
     useEffect(() => {
         const socket = io('https://taskmaster-dkd8.onrender.com');
         socket.emit('user_login', userInfo._id);
 
-        socket.on('task_added', (newTask: Task) => {
-            setTasks(prevTasks => [...prevTasks, newTask]);
-        });
+        socket.on('task_added', addTask);
 
         socket.on('task_updated', (updatedTask: Task) => {
             setTasks(prevTasks => prevTasks.map(task => task._id === updatedTask._id ? updatedTask : task));
@@ -116,9 +122,10 @@ const Dashboard: React.FC = () => {
         fetchCompletedTasks();
 
         return () => {
+            socket.off('task_added', addTask);
             socket.disconnect();
         };
-    }, [userInfo._id]);
+    }, [userInfo._id, addTask]);
 
     const fetchTasks = async () => {
         try {
@@ -142,7 +149,7 @@ const Dashboard: React.FC = () => {
         if (task) {
             try {
                 const response = await Api.post('/create', { taskName: task });
-                setTasks(prevTasks => [...prevTasks, response.data.task]);
+                addTask(response.data.task);
                 setTask('');
                 setIsModalOpen(false);
             } catch (error) {
@@ -350,8 +357,8 @@ const Dashboard: React.FC = () => {
                                     <p className='mb-3 text-sm'>Great job so far! Check out the completed task below and keep up the good work!</p>
                                     {completedTasks.length > 0 ? (
                                         <div className="space-y-4">
-                                            {completedTasks.map((completedTask, index) => (
-                                                <div key={index} className="bg-[#423F3E] p-4">
+                                            {completedTasks.map((completedTask) => (
+                                                <div key={completedTask._id} className="bg-[#423F3E] p-4">
                                                     <h3 className="flex items-center break-words">
                                                         <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0" />
                                                         <span>{completedTask.taskName}</span>
