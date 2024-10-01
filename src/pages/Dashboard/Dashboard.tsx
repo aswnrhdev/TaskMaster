@@ -84,6 +84,8 @@ const Dashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState('taskDetails');
     const [task, setTask] = useState('');
     const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -157,15 +159,26 @@ const Dashboard: React.FC = () => {
     };
 
     const handleAddTask = async () => {
-        if (task) {
-            try {
-                const response = await Api.post('/create', { taskName: task });
+        if (isSubmitting) return;
+        setError(null);
+        if (!task.trim()) {
+            setError("Task name cannot be empty");
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            const response = await Api.post('/create', { taskName: task });
+            if (response.data.success) {
                 addTask(response.data.task);
                 setTask('');
                 setIsModalOpen(false);
-            } catch (error) {
-                console.error('Failed to add task:', error);
+            } else {
+                setError(response.data.message);
             }
+        } catch (error: any) {
+            setError(error.response?.data?.message || "Failed to add task");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -198,6 +211,11 @@ const Dashboard: React.FC = () => {
 
     const handleUpdateTask = async () => {
         if (editingTask && task) {
+            setError(null);
+            if (!task.trim()) {
+                setError("Task name cannot be empty");
+                return;
+            }
             try {
                 const response = await Api.put(`/update/${editingTask._id}`, { taskName: task });
                 if (response.data.success) {
@@ -206,10 +224,10 @@ const Dashboard: React.FC = () => {
                     setEditingTask(null);
                     setTask('');
                 } else {
-                    console.error('Failed to update task:', response.data.message);
+                    setError(response.data.message);
                 }
-            } catch (error) {
-                console.error('Failed to update task:', error);
+            } catch (error: any) {
+                setError(error.response?.data?.message || "Failed to update task");
             }
         }
     };
@@ -398,16 +416,22 @@ const Dashboard: React.FC = () => {
                             value={task}
                             onChange={(e) => setTask(e.target.value)}
                         />
+                        {error && <p className="text-red-500 mb-4">{error}</p>}
                         <div className="flex justify-end space-x-4">
                             <button
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
                                 onClick={handleAddTask}
+                                disabled={isSubmitting}
                             >
-                                Launch Task
+                                {isSubmitting ? 'Launching...' : 'Launch Task'}
                             </button>
                             <button
                                 className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors"
-                                onClick={() => setIsModalOpen(false)}
+                                onClick={() => {
+                                    setIsModalOpen(false);
+                                    setError(null);
+                                    setTask('');
+                                }}
                             >
                                 Abort Task
                             </button>
@@ -428,6 +452,7 @@ const Dashboard: React.FC = () => {
                             value={task}
                             onChange={(e) => setTask(e.target.value)}
                         />
+                        {error && <p className="text-red-500 mb-4">{error}</p>}
                         <div className="flex justify-end space-x-4">
                             <button
                                 className="bg-[#DC5F00] hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
@@ -441,6 +466,7 @@ const Dashboard: React.FC = () => {
                                     setIsEditModalOpen(false);
                                     setEditingTask(null);
                                     setTask('');
+                                    setError(null);
                                 }}
                             >
                                 Cancel
