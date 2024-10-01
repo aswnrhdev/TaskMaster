@@ -16,7 +16,6 @@ interface Task {
     status: 'Pending' | 'In Progress' | 'Completed';
 }
 
-
 const Starfield: React.FC = () => {
     useEffect(() => {
         const canvas = document.getElementById('starfield') as HTMLCanvasElement;
@@ -423,7 +422,7 @@ const Dashboard: React.FC = () => {
                                 onClick={handleAddTask}
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? 'Launching...' : 'Launch Task'}
+                                {isSubmitting ? 'Launch Task' : 'Launch Task'}
                             </button>
                             <button
                                 className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors"
