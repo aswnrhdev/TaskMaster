@@ -118,7 +118,7 @@ const Dashboard: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        const socket = io('http://localhost:5000');
+        const socket = io('https://taskmaster-dkd8.onrender.com');
         socket.emit('user_login', userInfo._id);
 
         socket.on('task_added', addTask);
