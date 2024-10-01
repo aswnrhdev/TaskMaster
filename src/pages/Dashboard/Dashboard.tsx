@@ -99,33 +99,44 @@ const Dashboard: React.FC = () => {
         });
     }, []);
 
+    const updateTask = useCallback((updatedTask: Task) => {
+        setTasks(prevTasks => prevTasks.map(task => task._id === updatedTask._id ? updatedTask : task));
+    }, []);
+
+    const removeTask = useCallback((taskId: string) => {
+        setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
+    }, []);
+
+    const completeTask = useCallback((completedTask: Task) => {
+        setTasks(prevTasks => prevTasks.filter(task => task._id !== completedTask._id));
+        setCompletedTasks(prevCompletedTasks => {
+            if (!prevCompletedTasks.some(task => task._id === completedTask._id)) {
+                return [...prevCompletedTasks, completedTask];
+            }
+            return prevCompletedTasks;
+        });
+    }, []);
+
     useEffect(() => {
-        const socket = io('https://taskmaster-dkd8.onrender.com');
+        const socket = io('http://localhost:5000');
         socket.emit('user_login', userInfo._id);
 
         socket.on('task_added', addTask);
-
-        socket.on('task_updated', (updatedTask: Task) => {
-            setTasks(prevTasks => prevTasks.map(task => task._id === updatedTask._id ? updatedTask : task));
-        });
-
-        socket.on('task_deleted', (deletedTaskId: string) => {
-            setTasks(prevTasks => prevTasks.filter(task => task._id !== deletedTaskId));
-        });
-
-        socket.on('task_completed', (completedTask: Task) => {
-            setTasks(prevTasks => prevTasks.filter(task => task._id !== completedTask._id));
-            setCompletedTasks(prevCompletedTasks => [...prevCompletedTasks, completedTask]);
-        });
+        socket.on('task_updated', updateTask);
+        socket.on('task_deleted', removeTask);
+        socket.on('task_completed', completeTask);
 
         fetchTasks();
         fetchCompletedTasks();
 
         return () => {
             socket.off('task_added', addTask);
+            socket.off('task_updated', updateTask);
+            socket.off('task_deleted', removeTask);
+            socket.off('task_completed', completeTask);
             socket.disconnect();
         };
-    }, [userInfo._id, addTask]);
+    }, [userInfo._id, addTask, updateTask, removeTask, completeTask]);
 
     const fetchTasks = async () => {
         try {
@@ -162,7 +173,7 @@ const Dashboard: React.FC = () => {
         if (taskId && confirm('Are you sure you want to delete this task?')) {
             try {
                 await Api.delete(`/delete/${taskId}`);
-                setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
+                removeTask(taskId);
             } catch (error) {
                 console.error('Failed to delete task:', error);
             }
@@ -173,8 +184,7 @@ const Dashboard: React.FC = () => {
         try {
             const response = await Api.put(`/status/${taskId}`, { status: 'Completed' });
             const completedTask = response.data.task;
-            setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
-            setCompletedTasks(prevCompletedTasks => [...prevCompletedTasks, completedTask]);
+            completeTask(completedTask);
         } catch (error) {
             console.error('Failed to complete task:', error);
         }
@@ -191,7 +201,7 @@ const Dashboard: React.FC = () => {
             try {
                 const response = await Api.put(`/update/${editingTask._id}`, { taskName: task });
                 if (response.data.success) {
-                    setTasks(prevTasks => prevTasks.map(t => t._id === editingTask._id ? response.data.task : t));
+                    updateTask(response.data.task);
                     setIsEditModalOpen(false);
                     setEditingTask(null);
                     setTask('');
@@ -373,9 +383,6 @@ const Dashboard: React.FC = () => {
                             )}
                         </div>
                     </div>
-
-
-
                 </div>
             </div>
 
@@ -409,6 +416,7 @@ const Dashboard: React.FC = () => {
                 </div>
             )}
 
+            {/* Edit Task Modal */}
             {isEditModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                     <div className="bg-[#373A40] p-8 rounded-xl shadow-lg w-full max-w-md">
