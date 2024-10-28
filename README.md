@@ -1,4 +1,4 @@
-# TaskMaster Frontend
+# Task Master Frontend
 
 TaskMaster is a task management application that enables real-time collaboration using React and Socket.io. Users can create, assign, and track tasks with instant updates across all devices, without requiring page refreshes.
 
